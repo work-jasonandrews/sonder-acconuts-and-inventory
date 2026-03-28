@@ -524,6 +524,14 @@
             <input type="text" id="inv-name" placeholder="e.g. Beef, Eggs" />
           </div>
           <div class="form-group">
+            <label>Type *</label>
+            <select id="inv-type">
+              <option value="Perishable">Perishable</option>
+              <option value="Non-perishable">Non-perishable</option>
+              <option value="Equipment">Equipment</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label>Category</label>
             <select id="inv-category">
               <option>Meat & Seafood</option>
@@ -532,6 +540,7 @@
               <option>Dry Goods</option>
               <option>Spices</option>
               <option>Packaging</option>
+              <option>Equipment</option>
               <option>Other</option>
             </select>
           </div>
@@ -572,6 +581,12 @@
         <h3>Inventory List</h3>
         <div class="filter-row" style="margin:0;">
           <input type="text" id="inv-search" placeholder="Search…" oninput="filterInventory()" style="width:160px;" />
+          <select id="inv-filter-type" onchange="filterInventory()">
+            <option value="">All Types</option>
+            <option value="Perishable">Perishable</option>
+            <option value="Non-perishable">Non-perishable</option>
+            <option value="Equipment">Equipment</option>
+          </select>
           <select id="inv-filter-cat" onchange="filterInventory()">
             <option value="">All Categories</option>
             <option>Meat & Seafood</option>
@@ -580,6 +595,7 @@
             <option>Dry Goods</option>
             <option>Spices</option>
             <option>Packaging</option>
+            <option>Equipment</option>
             <option>Other</option>
           </select>
         </div>
@@ -588,9 +604,9 @@
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Item</th><th>Category</th><th>Qty</th><th>Unit</th><th>Status</th><th>Notes</th>
+              <th>Item</th><th>Type</th><th>Category</th><th>Qty</th><th>Unit</th><th>Status</th><th>Notes</th>
             </tr></thead>
-            <tbody id="inventory-tbody"><tr><td colspan="6" class="loading">Loading inventory…</td></tr></tbody>
+            <tbody id="inventory-tbody"><tr><td colspan="7" class="loading">Loading inventory…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -900,33 +916,34 @@ function switchTab(name) {
 }
 
 // ══════════════════════════════════════════════
-// API CALLS
+// API CALLS — all via GET query params
+// GAS deployed as "Anyone" handles GET cross-origin.
+// POST triggers CORS preflight which GAS can't handle,
+// so writes are sent as GET with action param.
 // ══════════════════════════════════════════════
 async function api(action, payload = {}) {
   if (!SCRIPT_URL) { showToast('⚠ No script URL set. Go to Settings.'); return null; }
   try {
-    const url = new URL(SCRIPT_URL);
-    url.searchParams.set('action', action);
-    Object.entries(payload).forEach(([k,v]) => url.searchParams.set(k, v));
-    const res = await fetch(url.toString(), { method: 'GET' });
-    const data = await res.json();
-    return data;
+    const base = SCRIPT_URL.split('?')[0];
+    const params = new URLSearchParams({ action, ...payload });
+    const res = await fetch(base + '?' + params.toString(), { method: 'GET', redirect: 'follow' });
+    return JSON.parse(await res.text());
   } catch (e) {
-    showToast('Connection error. Check your Script URL.');
+    console.error('api() error:', e);
     return null;
   }
 }
 async function apiPost(action, payload = {}) {
   if (!SCRIPT_URL) { showToast('⚠ No script URL set. Go to Settings.'); return null; }
   try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action, ...payload })
-    });
-    const data = await res.json();
-    return data;
+    const base = SCRIPT_URL.split('?')[0];
+    const flat = { action };
+    Object.entries(payload).forEach(([k, v]) => { flat[k] = String(v); });
+    const params = new URLSearchParams(flat);
+    const res = await fetch(base + '?' + params.toString(), { method: 'GET', redirect: 'follow' });
+    return JSON.parse(await res.text());
   } catch (e) {
-    showToast('Connection error. Check your Script URL.');
+    console.error('apiPost() error:', e);
     return null;
   }
 }
@@ -1018,33 +1035,49 @@ async function fetchInventory() {
   inventoryData = (res && res.data) ? res.data : [];
 }
 async function loadInventory() {
-  document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+  document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
   await fetchInventory();
   renderInventory(inventoryData);
 }
 function renderInventory(data) {
   const tbody = document.getElementById('inventory-tbody');
-  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No items yet.</td></tr>'; return; }
-  tbody.innerHTML = data.map((r, i) => {
-    const qty = parseFloat(r[3]) || 0;
-    const alert = parseFloat(r[4]) || 0;
-    const isLow = alert > 0 && qty <= alert;
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No items yet.</td></tr>'; return; }
+  tbody.innerHTML = data.map((r) => {
+    // [0]Name [1]Type [2]Category [3]Unit [4]Qty [5]Alert [6]Notes
+    const qty = parseFloat(r[4]) || 0;
+    const alert = parseFloat(r[5]) || 0;
+    const isEquipment = (r[1] || '') === 'Equipment';
+    const isLow = !isEquipment && alert > 0 && qty <= alert;
+    const typeBadge = r[1] === 'Perishable'
+      ? '<span class="badge badge-red">Perishable</span>'
+      : r[1] === 'Equipment'
+      ? '<span class="badge badge-gold">Equipment</span>'
+      : '<span class="badge badge-muted">Non-perishable</span>';
+    const statusBadge = isEquipment
+      ? '<span class="badge badge-muted">N/A</span>'
+      : isLow
+      ? '<span class="badge badge-red">Low Stock</span>'
+      : '<span class="badge badge-green">OK</span>';
     return `<tr>
       <td><strong>${r[0]}</strong></td>
-      <td><span class="badge badge-muted">${r[1] || '—'}</span></td>
-      <td>${fmtNum(qty)}</td>
-      <td>${r[2] || '—'}</td>
-      <td>${isLow ? '<span class="badge badge-red">Low Stock</span>' : '<span class="badge badge-green">OK</span>'}</td>
-      <td style="color:var(--muted);font-size:0.78rem;">${r[5] || ''}</td>
+      <td>${typeBadge}</td>
+      <td><span class="badge badge-muted">${r[2] || '—'}</span></td>
+      <td>${isEquipment ? '—' : fmtNum(qty)}</td>
+      <td>${r[3] || '—'}</td>
+      <td>${statusBadge}</td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r[6] || ''}</td>
     </tr>`;
   }).join('');
 }
 function filterInventory() {
   const q = document.getElementById('inv-search').value.toLowerCase();
+  const type = document.getElementById('inv-filter-type').value;
   const cat = document.getElementById('inv-filter-cat').value;
+  // [0]Name [1]Type [2]Category
   const filtered = inventoryData.filter(r =>
     (!q || r[0].toLowerCase().includes(q)) &&
-    (!cat || r[1] === cat)
+    (!type || r[1] === type) &&
+    (!cat || r[2] === cat)
   );
   renderInventory(filtered);
 }
@@ -1053,6 +1086,7 @@ async function addInventory() {
   if (!name) { showToast('Item name is required.'); return; }
   const payload = {
     name,
+    type: document.getElementById('inv-type').value,
     category: document.getElementById('inv-category').value,
     unit: document.getElementById('inv-unit').value,
     quantity: document.getElementById('inv-qty').value,
