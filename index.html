@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sonder — Accounts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --cream: #F7F3EC;
+    --cream-dark: #EDE7D9;
+    --sage: #7A9E87;
+    --sage-light: #A8C4B0;
+    --sage-dark: #4E7560;
+    --gold: #B89A5A;
+    --gold-light: #D4B97A;
+    --charcoal: #2C2C2C;
+    --muted: #7A7265;
+    --border: #DDD5C5;
+    --red: #B85A5A;
+    --red-light: #F5EAEA;
+    --green-light: #EAF2EC;
+    --white: #FFFFFF;
+    --shadow: 0 2px 16px rgba(44,44,44,0.07);
+    --shadow-lg: 0 8px 40px rgba(44,44,44,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--charcoal);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--cream);
+    letter-spacing: 0.08em;
+  }
+  .brand span { color: var(--gold); }
+  .header-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ── NAV TABS ── */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    padding: 0 2rem;
+    position: sticky;
+    top: 64px;
+    z-index: 99;
+    overflow-x: auto;
+  }
+  nav button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    padding: 1rem 1.25rem;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav button:hover { color: var(--charcoal); }
+  nav button.active {
+    border-bottom-color: var(--gold);
+    color: var(--charcoal);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── PAGE HEADING ── */
+  .page-heading {
+    margin-bottom: 2rem;
+  }
+  .page-heading h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--charcoal);
+    margin-bottom: 0.25rem;
+  }
+  .page-heading p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.25rem 1.5rem;
+  }
+  .stat-card .label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  .stat-card .value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--charcoal);
+    line-height: 1;
+  }
+  .stat-card .value.green { color: var(--sage-dark); }
+  .stat-card .value.red { color: var(--red); }
+  .stat-card .value.gold { color: var(--gold); }
+  .stat-card .sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* ── CARDS / SECTIONS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-head h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+  .card-body { padding: 1.5rem; }
+
+  /* ── FORM ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--charcoal);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 300;
+    padding: 0.55rem 0.75rem;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--sage);
+    outline: none;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    padding: 0.6rem 1.4rem;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--charcoal);
+    color: var(--cream);
+  }
+  .btn-primary:hover { background: var(--sage-dark); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-secondary:hover { border-color: var(--charcoal); color: var(--charcoal); }
+  .btn-gold {
+    background: var(--gold);
+    color: var(--white);
+  }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.65rem; }
+  .btn-danger { background: var(--red); color: var(--white); }
+
+  .btn-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82rem;
+  }
+  thead tr {
+    border-bottom: 2px solid var(--border);
+  }
+  thead th {
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--cream-dark);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: var(--cream); }
+  tbody td {
+    padding: 0.7rem 0.75rem;
+    vertical-align: middle;
+  }
+  .badge {
+    border-radius: 2px;
+    display: inline-block;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.55rem;
+    text-transform: uppercase;
+  }
+  .badge-green { background: var(--green-light); color: var(--sage-dark); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-gold { background: #FBF5E8; color: var(--gold); }
+  .badge-muted { background: var(--cream-dark); color: var(--muted); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--charcoal);
+    color: var(--cream);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 999;
+  }
+  #toast.show { opacity: 1; }
+
+  /* ── LOADING ── */
+  .loading {
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 2rem;
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+  .empty-state {
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 2.5rem;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* ── FILTER ROW ── */
+  .filter-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .filter-row input,
+  .filter-row select {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--charcoal);
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 300;
+    padding: 0.45rem 0.75rem;
+  }
+  .filter-row input:focus,
+  .filter-row select:focus { border-color: var(--sage); outline: none; }
+
+  /* ── SETTINGS BANNER ── */
+  .settings-banner {
+    background: #FBF5E8;
+    border: 1px solid var(--gold-light);
+    border-radius: 2px;
+    color: var(--gold);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .settings-banner a {
+    color: var(--gold);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* ── P&L SECTION ── */
+  .pl-event-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .pl-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--cream-dark);
+    font-size: 0.85rem;
+  }
+  .pl-line.total {
+    border-bottom: 2px solid var(--charcoal);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  .pl-line.profit { color: var(--sage-dark); font-weight: 500; }
+  .pl-line.loss { color: var(--red); font-weight: 500; }
+  .pl-section-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.75rem 0 0.25rem;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 0 1rem; }
+    nav { padding: 0 0.5rem; }
+    main { padding: 1.25rem 1rem 3rem; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">Sonder <span>·</span> Accounts</div>
+  </div>
+  <div class="header-sub">Internal Dashboard</div>
+</header>
+
+<nav id="nav">
+  <button class="active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button onclick="switchTab('inventory')">Inventory</button>
+  <button onclick="switchTab('purchases')">Purchases & Expenses</button>
+  <button onclick="switchTab('sales')">Sales</button>
+  <button onclick="switchTab('pl')">P &amp; L</button>
+  <button onclick="switchTab('settings')">Settings</button>
+</nav>
+
+<div id="toast"></div>
+
+<main>
+
+  <!-- ══════════════════ SETTINGS ══════════════════ -->
+  <div id="tab-settings" class="tab-panel">
+    <div class="page-heading">
+      <h2>Settings</h2>
+      <p>Connect your Google Sheet to get started</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Google Apps Script URL</h3></div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.7;">
+          Paste your deployed Google Apps Script Web App URL below. This connects Sonder Accounts to your Google Sheet for all data storage.
+        </p>
+        <div class="form-grid" style="grid-template-columns:1fr;">
+          <div class="form-group">
+            <label>Script URL</label>
+            <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="saveSettings()">Save & Test Connection</button>
+          <button class="btn btn-secondary" onclick="testConnection()">Test Only</button>
+        </div>
+        <div id="conn-status" style="margin-top:1rem;font-size:0.8rem;color:var(--muted);"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Sheet Setup Guide</h3></div>
+      <div class="card-body" style="font-size:0.82rem;line-height:1.9;color:var(--muted);">
+        <p>Create a Google Sheet named <strong style="color:var(--charcoal)">Sonder Accounts</strong> with the following tabs:</p>
+        <br/>
+        <p><strong style="color:var(--charcoal)">Sheet: Inventory</strong><br/>
+        Name | Category | Unit | Quantity | Low Stock Alert | Notes</p>
+        <br/>
+        <p><strong style="color:var(--charcoal)">Sheet: Purchases</strong><br/>
+        Timestamp | Date | Vendor | Item | Category | Quantity | Unit | Unit Price (₹) | Total (₹) | Pop-Up Tag | Notes</p>
+        <br/>
+        <p><strong style="color:var(--charcoal)">Sheet: Sales</strong><br/>
+        Timestamp | Date | Pop-Up | Item | Qty Sold | Unit Price (₹) | Total (₹) | Notes</p>
+        <br/>
+        <p><strong style="color:var(--charcoal)">Sheet: Expenses</strong><br/>
+        Timestamp | Date | Category | Description | Amount (₹) | Pop-Up Tag | Notes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ DASHBOARD ══════════════════ -->
+  <div id="tab-dashboard" class="tab-panel active">
+    <div class="page-heading">
+      <h2>Overview</h2>
+      <p>A quick look at how Sonder is doing</p>
+    </div>
+
+    <div id="no-script-banner" class="settings-banner" style="display:none;">
+      ⚠ No Google Sheet connected yet. <a onclick="switchTab('settings')">Go to Settings</a> to get started.
+    </div>
+
+    <div class="stat-row" id="dashboard-stats">
+      <div class="stat-card"><div class="label">Total Revenue</div><div class="value gold" id="stat-revenue">—</div><div class="sub">All time</div></div>
+      <div class="stat-card"><div class="label">Total Expenses</div><div class="value red" id="stat-expenses">—</div><div class="sub">Purchases + overheads</div></div>
+      <div class="stat-card"><div class="label">Net Profit</div><div class="value green" id="stat-profit">—</div><div class="sub">Revenue − Expenses</div></div>
+      <div class="stat-card"><div class="label">Low Stock Items</div><div class="value" id="stat-lowstock">—</div><div class="sub">Need restocking</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Recent Activity</h3></div>
+      <div class="card-body">
+        <div id="recent-activity" class="empty-state">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ INVENTORY ══════════════════ -->
+  <div id="tab-inventory" class="tab-panel">
+    <div class="page-heading">
+      <h2>Inventory</h2>
+      <p>Track your ingredients and supplies</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Add / Update Item</h3></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Item Name *</label>
+            <input type="text" id="inv-name" placeholder="e.g. Beef, Eggs" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="inv-category">
+              <option>Meat & Seafood</option>
+              <option>Produce</option>
+              <option>Dairy</option>
+              <option>Dry Goods</option>
+              <option>Spices</option>
+              <option>Packaging</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="inv-qty" placeholder="0" min="0" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select id="inv-unit">
+              <option>kg</option>
+              <option>g</option>
+              <option>L</option>
+              <option>ml</option>
+              <option>pcs</option>
+              <option>pkt</option>
+              <option>box</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Low Stock Alert At</label>
+            <input type="number" id="inv-alert" placeholder="e.g. 0.5" min="0" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="inv-notes" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addInventory()">Add to Inventory</button>
+          <button class="btn btn-secondary" onclick="loadInventory()">↺ Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Inventory List</h3>
+        <div class="filter-row" style="margin:0;">
+          <input type="text" id="inv-search" placeholder="Search…" oninput="filterInventory()" style="width:160px;" />
+          <select id="inv-filter-cat" onchange="filterInventory()">
+            <option value="">All Categories</option>
+            <option>Meat & Seafood</option>
+            <option>Produce</option>
+            <option>Dairy</option>
+            <option>Dry Goods</option>
+            <option>Spices</option>
+            <option>Packaging</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Item</th><th>Category</th><th>Qty</th><th>Unit</th><th>Status</th><th>Notes</th>
+            </tr></thead>
+            <tbody id="inventory-tbody"><tr><td colspan="6" class="loading">Loading inventory…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PURCHASES & EXPENSES ══════════════════ -->
+  <div id="tab-purchases" class="tab-panel">
+    <div class="page-heading">
+      <h2>Purchases &amp; Expenses</h2>
+      <p>Log every rupee that goes out</p>
+    </div>
+
+    <!-- Purchase Form -->
+    <div class="card">
+      <div class="card-head"><h3>Log a Purchase</h3><span style="font-size:0.72rem;color:var(--muted);">Ingredients & supplies</span></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="pur-date" />
+          </div>
+          <div class="form-group">
+            <label>Vendor *</label>
+            <input type="text" id="pur-vendor" placeholder="e.g. Russell Market" />
+          </div>
+          <div class="form-group">
+            <label>Item *</label>
+            <input type="text" id="pur-item" placeholder="e.g. Beef" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="pur-category">
+              <option>Meat & Seafood</option>
+              <option>Produce</option>
+              <option>Dairy</option>
+              <option>Dry Goods</option>
+              <option>Spices</option>
+              <option>Packaging</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" id="pur-qty" placeholder="0" min="0" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select id="pur-unit">
+              <option>kg</option><option>g</option><option>L</option>
+              <option>ml</option><option>pcs</option><option>pkt</option><option>box</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Unit Price (₹) *</label>
+            <input type="number" id="pur-unitprice" placeholder="0" min="0" step="0.5" oninput="calcPurchaseTotal()" />
+          </div>
+          <div class="form-group">
+            <label>Total (₹)</label>
+            <input type="number" id="pur-total" placeholder="Auto-calculated" min="0" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label>Pop-Up Tag</label>
+            <input type="text" id="pur-popup" placeholder="e.g. Easter 2026" />
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="pur-notes" placeholder="Optional" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addPurchase()">Log Purchase</button>
+      </div>
+    </div>
+
+    <!-- Expense Form -->
+    <div class="card">
+      <div class="card-head"><h3>Log an Expense</h3><span style="font-size:0.72rem;color:var(--muted);">Overheads & other costs</span></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="exp-date" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="exp-category">
+              <option>Packaging</option>
+              <option>Transport</option>
+              <option>Platform Fees</option>
+              <option>Equipment</option>
+              <option>Marketing</option>
+              <option>Utilities</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Description *</label>
+            <input type="text" id="exp-desc" placeholder="e.g. Razorpay charges" />
+          </div>
+          <div class="form-group">
+            <label>Amount (₹) *</label>
+            <input type="number" id="exp-amount" placeholder="0" min="0" step="0.5" />
+          </div>
+          <div class="form-group">
+            <label>Pop-Up Tag</label>
+            <input type="text" id="exp-popup" placeholder="e.g. Easter 2026" />
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="exp-notes" placeholder="Optional" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addExpense()">Log Expense</button>
+      </div>
+    </div>
+
+    <!-- Log Table -->
+    <div class="card">
+      <div class="card-head">
+        <h3>All Purchases &amp; Expenses</h3>
+        <div class="btn-row" style="gap:0.5rem;">
+          <button class="btn btn-secondary btn-sm" onclick="loadPurchases()">↺ Refresh</button>
+          <button class="btn btn-gold btn-sm" onclick="exportPurchasesCSV()">Export CSV</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="filter-row" style="padding:1rem 1.25rem 0;">
+          <input type="text" id="pur-search" placeholder="Search…" oninput="filterPurchases()" style="width:160px;" />
+          <select id="pur-filter-popup" onchange="filterPurchases()">
+            <option value="">All Pop-Ups</option>
+          </select>
+          <select id="pur-filter-type" onchange="filterPurchases()">
+            <option value="">Purchases + Expenses</option>
+            <option value="purchase">Purchases only</option>
+            <option value="expense">Expenses only</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="margin-top:0.75rem;">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Description</th><th>Vendor/Cat</th><th>Qty</th><th>Pop-Up</th><th>Amount (₹)</th>
+            </tr></thead>
+            <tbody id="purchases-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:0.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:2rem;font-size:0.8rem;color:var(--muted);">
+          Total shown: <strong id="pur-total-shown" style="color:var(--charcoal);">—</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SALES ══════════════════ -->
+  <div id="tab-sales" class="tab-panel">
+    <div class="page-heading">
+      <h2>Sales</h2>
+      <p>Record what you sold at each pop-up</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Log a Sale</h3></div>
+      <div class="card-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="sale-date" />
+          </div>
+          <div class="form-group">
+            <label>Pop-Up *</label>
+            <input type="text" id="sale-popup" placeholder="e.g. Easter 2026" />
+          </div>
+          <div class="form-group">
+            <label>Item Sold *</label>
+            <input type="text" id="sale-item" placeholder="e.g. Kerala Beef Roast" />
+          </div>
+          <div class="form-group">
+            <label>Qty Sold *</label>
+            <input type="number" id="sale-qty" placeholder="0" min="0" step="1" oninput="calcSaleTotal()" />
+          </div>
+          <div class="form-group">
+            <label>Unit Price (₹) *</label>
+            <input type="number" id="sale-unitprice" placeholder="0" min="0" step="0.5" oninput="calcSaleTotal()" />
+          </div>
+          <div class="form-group">
+            <label>Total (₹)</label>
+            <input type="number" id="sale-total" placeholder="Auto-calculated" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <input type="text" id="sale-notes" placeholder="Optional" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addSale()">Log Sale</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Sales Log</h3>
+        <div class="btn-row" style="gap:0.5rem;">
+          <button class="btn btn-secondary btn-sm" onclick="loadSales()">↺ Refresh</button>
+          <button class="btn btn-gold btn-sm" onclick="exportSalesCSV()">Export CSV</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        <div class="filter-row" style="padding:1rem 1.25rem 0;">
+          <input type="text" id="sale-search" placeholder="Search…" oninput="filterSales()" style="width:160px;" />
+          <select id="sale-filter-popup" onchange="filterSales()">
+            <option value="">All Pop-Ups</option>
+          </select>
+        </div>
+        <div class="table-wrap" style="margin-top:0.75rem;">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Pop-Up</th><th>Item</th><th>Qty</th><th>Unit Price (₹)</th><th>Total (₹)</th><th>Notes</th>
+            </tr></thead>
+            <tbody id="sales-tbody"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div style="padding:0.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:2rem;font-size:0.8rem;color:var(--muted);">
+          Total revenue shown: <strong id="sale-total-shown" style="color:var(--charcoal);">—</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ P&L ══════════════════ -->
+  <div id="tab-pl" class="tab-panel">
+    <div class="page-heading">
+      <h2>Profit &amp; Loss</h2>
+      <p>See if the numbers make sense</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h3>Filter by Pop-Up</h3></div>
+      <div class="card-body">
+        <div class="pl-event-row">
+          <div class="form-group" style="flex:1;min-width:200px;">
+            <label>Pop-Up</label>
+            <select id="pl-popup-select" onchange="renderPL()">
+              <option value="all">All Pop-Ups (Cumulative)</option>
+            </select>
+          </div>
+          <button class="btn btn-gold" onclick="exportPLPDF()">Download PDF Report</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-row" id="pl-stats">
+      <div class="stat-card"><div class="label">Revenue</div><div class="value gold" id="pl-revenue">—</div></div>
+      <div class="stat-card"><div class="label">Cost of Goods</div><div class="value red" id="pl-cogs">—</div><div class="sub">Purchases</div></div>
+      <div class="stat-card"><div class="label">Overheads</div><div class="value red" id="pl-overheads">—</div><div class="sub">Expenses</div></div>
+      <div class="stat-card"><div class="label">Net Profit / Loss</div><div class="value" id="pl-net">—</div></div>
+    </div>
+
+    <div class="card" id="pl-breakdown-card">
+      <div class="card-head"><h3>Breakdown</h3></div>
+      <div class="card-body" id="pl-breakdown">
+        <div class="empty-state">Select a pop-up and load data to see the breakdown.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('sonderAccountsScript') || '';
+let inventoryData = [];
+let purchasesData = [];
+let expensesData = [];
+let salesData = [];
+
+// ══════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════
+function fmt(n) {
+  if (isNaN(n) || n === null || n === undefined) return '—';
+  return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+function fmtNum(n) {
+  return Number(n).toLocaleString('en-IN');
+}
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const btns = document.querySelectorAll('nav button');
+  const labels = ['dashboard', 'inventory', 'purchases', 'sales', 'pl', 'settings'];
+  btns[labels.indexOf(name)].classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'inventory') loadInventory();
+  if (name === 'purchases') loadPurchases();
+  if (name === 'sales') loadSales();
+  if (name === 'pl') loadPL();
+}
+
+// ══════════════════════════════════════════════
+// API CALLS
+// ══════════════════════════════════════════════
+async function api(action, payload = {}) {
+  if (!SCRIPT_URL) { showToast('⚠ No script URL set. Go to Settings.'); return null; }
+  try {
+    const url = new URL(SCRIPT_URL);
+    url.searchParams.set('action', action);
+    Object.entries(payload).forEach(([k,v]) => url.searchParams.set(k, v));
+    const res = await fetch(url.toString(), { method: 'GET' });
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    showToast('Connection error. Check your Script URL.');
+    return null;
+  }
+}
+async function apiPost(action, payload = {}) {
+  if (!SCRIPT_URL) { showToast('⚠ No script URL set. Go to Settings.'); return null; }
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action, ...payload })
+    });
+    const data = await res.json();
+    return data;
+  } catch (e) {
+    showToast('Connection error. Check your Script URL.');
+    return null;
+  }
+}
+
+// ══════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════
+function saveSettings() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { showToast('Please enter a script URL.'); return; }
+  SCRIPT_URL = url;
+  localStorage.setItem('sonderAccountsScript', url);
+  testConnection();
+}
+async function testConnection() {
+  const url = document.getElementById('scriptUrl').value.trim() || SCRIPT_URL;
+  if (!url) { showToast('No URL to test.'); return; }
+  const el = document.getElementById('conn-status');
+  el.textContent = 'Testing…';
+  SCRIPT_URL = url;
+  const res = await api('ping');
+  if (res && res.status === 'ok') {
+    el.textContent = '✓ Connected successfully.';
+    el.style.color = 'var(--sage-dark)';
+    showToast('✓ Connected to Google Sheet.');
+  } else {
+    el.textContent = '✗ Could not connect. Check your URL and make sure the script is deployed as a web app.';
+    el.style.color = 'var(--red)';
+  }
+}
+
+// ══════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════
+async function loadDashboard() {
+  if (!SCRIPT_URL) {
+    document.getElementById('no-script-banner').style.display = 'flex';
+    return;
+  }
+  document.getElementById('no-script-banner').style.display = 'none';
+  await Promise.all([fetchInventory(), fetchPurchases(), fetchSales()]);
+  const totalRev = salesData.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const totalPur = purchasesData.filter(r => r[1] === 'purchase').reduce((s, r) => s + (parseFloat(r[10]) || 0), 0);
+  const totalExp = purchasesData.filter(r => r[1] === 'expense').reduce((s, r) => s + (parseFloat(r[10]) || 0), 0);
+  const profit = totalRev - totalPur - totalExp;
+  const lowStock = inventoryData.filter(r => {
+    const qty = parseFloat(r[3]) || 0;
+    const alert = parseFloat(r[4]) || 0;
+    return alert > 0 && qty <= alert;
+  }).length;
+
+  document.getElementById('stat-revenue').textContent = fmt(totalRev);
+  document.getElementById('stat-expenses').textContent = fmt(totalPur + totalExp);
+  document.getElementById('stat-profit').textContent = fmt(profit);
+  document.getElementById('stat-profit').className = 'value ' + (profit >= 0 ? 'green' : 'red');
+  document.getElementById('stat-lowstock').textContent = lowStock;
+
+  // Recent activity = last 6 entries across all
+  const activity = document.getElementById('recent-activity');
+  const recent = [
+    ...salesData.map(r => ({ date: r[0], type: 'Sale', desc: r[2] + ' × ' + r[3], amount: '+' + fmt(r[6]) })),
+    ...purchasesData.map(r => ({ date: r[0], type: r[1] === 'expense' ? 'Expense' : 'Purchase', desc: r[3], amount: '-' + fmt(r[10]) }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+
+  if (!recent.length) { activity.innerHTML = '<div class="empty-state">No data yet. Start logging!</div>'; return; }
+  activity.innerHTML = `<table style="width:100%;font-size:0.82rem;border-collapse:collapse;">
+    <thead><tr>
+      <th style="color:var(--muted);font-size:0.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .5rem;text-align:left;">Date</th>
+      <th style="color:var(--muted);font-size:0.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .5rem;text-align:left;">Type</th>
+      <th style="color:var(--muted);font-size:0.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .5rem;text-align:left;">Description</th>
+      <th style="color:var(--muted);font-size:0.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .5rem;text-align:right;">Amount</th>
+    </tr></thead>
+    <tbody>
+    ${recent.map(r => `<tr style="border-bottom:1px solid var(--cream-dark);">
+      <td style="padding:.55rem .5rem;color:var(--muted);font-size:0.78rem;">${r.date}</td>
+      <td style="padding:.55rem .5rem;">${r.type}</td>
+      <td style="padding:.55rem .5rem;">${r.desc}</td>
+      <td style="padding:.55rem .5rem;text-align:right;font-weight:500;color:${r.amount.startsWith('+') ? 'var(--sage-dark)' : 'var(--red)'};">${r.amount}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ══════════════════════════════════════════════
+// INVENTORY
+// ══════════════════════════════════════════════
+async function fetchInventory() {
+  const res = await api('getInventory');
+  inventoryData = (res && res.data) ? res.data : [];
+}
+async function loadInventory() {
+  document.getElementById('inventory-tbody').innerHTML = '<tr><td colspan="6" class="loading">Loading…</td></tr>';
+  await fetchInventory();
+  renderInventory(inventoryData);
+}
+function renderInventory(data) {
+  const tbody = document.getElementById('inventory-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No items yet.</td></tr>'; return; }
+  tbody.innerHTML = data.map((r, i) => {
+    const qty = parseFloat(r[3]) || 0;
+    const alert = parseFloat(r[4]) || 0;
+    const isLow = alert > 0 && qty <= alert;
+    return `<tr>
+      <td><strong>${r[0]}</strong></td>
+      <td><span class="badge badge-muted">${r[1] || '—'}</span></td>
+      <td>${fmtNum(qty)}</td>
+      <td>${r[2] || '—'}</td>
+      <td>${isLow ? '<span class="badge badge-red">Low Stock</span>' : '<span class="badge badge-green">OK</span>'}</td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r[5] || ''}</td>
+    </tr>`;
+  }).join('');
+}
+function filterInventory() {
+  const q = document.getElementById('inv-search').value.toLowerCase();
+  const cat = document.getElementById('inv-filter-cat').value;
+  const filtered = inventoryData.filter(r =>
+    (!q || r[0].toLowerCase().includes(q)) &&
+    (!cat || r[1] === cat)
+  );
+  renderInventory(filtered);
+}
+async function addInventory() {
+  const name = document.getElementById('inv-name').value.trim();
+  if (!name) { showToast('Item name is required.'); return; }
+  const payload = {
+    name,
+    category: document.getElementById('inv-category').value,
+    unit: document.getElementById('inv-unit').value,
+    quantity: document.getElementById('inv-qty').value,
+    alert: document.getElementById('inv-alert').value,
+    notes: document.getElementById('inv-notes').value.trim()
+  };
+  const res = await apiPost('addInventory', payload);
+  if (res && res.status === 'ok') {
+    showToast('✓ Item saved to inventory.');
+    ['inv-name','inv-qty','inv-alert','inv-notes'].forEach(id => document.getElementById(id).value = '');
+    loadInventory();
+  }
+}
+
+// ══════════════════════════════════════════════
+// PURCHASES & EXPENSES
+// ══════════════════════════════════════════════
+async function fetchPurchases() {
+  const res = await api('getPurchases');
+  purchasesData = (res && res.data) ? res.data : [];
+}
+async function loadPurchases() {
+  document.getElementById('purchases-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
+  await fetchPurchases();
+  // populate popup filter
+  const popups = [...new Set(purchasesData.map(r => r[9]).filter(Boolean))];
+  const sel = document.getElementById('pur-filter-popup');
+  sel.innerHTML = '<option value="">All Pop-Ups</option>' + popups.map(p => `<option>${p}</option>`).join('');
+  renderPurchases(purchasesData);
+}
+function renderPurchases(data) {
+  const tbody = document.getElementById('purchases-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No entries yet.</td></tr>'; return; }
+  let total = 0;
+  tbody.innerHTML = data.map(r => {
+    const amt = parseFloat(r[10]) || 0;
+    total += amt;
+    const isPurchase = r[1] === 'purchase';
+    return `<tr>
+      <td style="white-space:nowrap;">${r[0]}</td>
+      <td><span class="badge ${isPurchase ? 'badge-muted' : 'badge-gold'}">${isPurchase ? 'Purchase' : 'Expense'}</span></td>
+      <td>${r[3]}</td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r[4] || '—'}</td>
+      <td>${r[5] ? fmtNum(r[5]) + ' ' + (r[6] || '') : '—'}</td>
+      <td style="font-size:0.78rem;">${r[9] || '—'}</td>
+      <td><strong>${fmt(amt)}</strong></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('pur-total-shown').textContent = fmt(total);
+}
+function filterPurchases() {
+  const q = document.getElementById('pur-search').value.toLowerCase();
+  const popup = document.getElementById('pur-filter-popup').value;
+  const type = document.getElementById('pur-filter-type').value;
+  const filtered = purchasesData.filter(r =>
+    (!q || r[3].toLowerCase().includes(q) || (r[4] || '').toLowerCase().includes(q)) &&
+    (!popup || r[9] === popup) &&
+    (!type || r[1] === type)
+  );
+  renderPurchases(filtered);
+}
+function calcPurchaseTotal() {
+  const qty = parseFloat(document.getElementById('pur-qty').value) || 0;
+  const up = parseFloat(document.getElementById('pur-unitprice').value) || 0;
+  if (qty && up) document.getElementById('pur-total').value = (qty * up).toFixed(2);
+}
+async function addPurchase() {
+  const vendor = document.getElementById('pur-vendor').value.trim();
+  const item = document.getElementById('pur-item').value.trim();
+  const unitprice = document.getElementById('pur-unitprice').value;
+  const date = document.getElementById('pur-date').value;
+  if (!vendor || !item || !unitprice || !date) { showToast('Date, vendor, item, and price are required.'); return; }
+  let total = document.getElementById('pur-total').value;
+  if (!total) {
+    const qty = parseFloat(document.getElementById('pur-qty').value) || 1;
+    total = (qty * parseFloat(unitprice)).toFixed(2);
+  }
+  const payload = {
+    type: 'purchase',
+    date,
+    vendor,
+    item,
+    category: document.getElementById('pur-category').value,
+    quantity: document.getElementById('pur-qty').value,
+    unit: document.getElementById('pur-unit').value,
+    unitPrice: unitprice,
+    total,
+    popup: document.getElementById('pur-popup').value.trim(),
+    notes: document.getElementById('pur-notes').value.trim()
+  };
+  const res = await apiPost('addPurchase', payload);
+  if (res && res.status === 'ok') {
+    showToast('✓ Purchase logged.');
+    ['pur-vendor','pur-item','pur-qty','pur-unitprice','pur-total','pur-notes'].forEach(id => document.getElementById(id).value = '');
+    loadPurchases();
+  }
+}
+async function addExpense() {
+  const desc = document.getElementById('exp-desc').value.trim();
+  const amount = document.getElementById('exp-amount').value;
+  const date = document.getElementById('exp-date').value;
+  if (!desc || !amount || !date) { showToast('Date, description, and amount are required.'); return; }
+  const payload = {
+    type: 'expense',
+    date,
+    vendor: '',
+    item: desc,
+    category: document.getElementById('exp-category').value,
+    quantity: '',
+    unit: '',
+    unitPrice: amount,
+    total: amount,
+    popup: document.getElementById('exp-popup').value.trim(),
+    notes: document.getElementById('exp-notes').value.trim()
+  };
+  const res = await apiPost('addPurchase', payload);
+  if (res && res.status === 'ok') {
+    showToast('✓ Expense logged.');
+    ['exp-desc','exp-amount','exp-notes','exp-popup'].forEach(id => document.getElementById(id).value = '');
+    loadPurchases();
+  }
+}
+function exportPurchasesCSV() {
+  const headers = ['Date','Type','Description','Vendor/Category','Qty','Unit','Unit Price','Total (₹)','Pop-Up','Notes'];
+  const rows = purchasesData.map(r => [r[0],r[1],r[3],r[4],r[5],r[6],r[7],r[10],r[9],r[11]]);
+  downloadCSV('Sonder_Purchases_Expenses', headers, rows);
+}
+
+// ══════════════════════════════════════════════
+// SALES
+// ══════════════════════════════════════════════
+async function fetchSales() {
+  const res = await api('getSales');
+  salesData = (res && res.data) ? res.data : [];
+}
+async function loadSales() {
+  document.getElementById('sales-tbody').innerHTML = '<tr><td colspan="7" class="loading">Loading…</td></tr>';
+  await fetchSales();
+  const popups = [...new Set(salesData.map(r => r[1]).filter(Boolean))];
+  const sel = document.getElementById('sale-filter-popup');
+  sel.innerHTML = '<option value="">All Pop-Ups</option>' + popups.map(p => `<option>${p}</option>`).join('');
+  renderSales(salesData);
+}
+function renderSales(data) {
+  const tbody = document.getElementById('sales-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No sales logged yet.</td></tr>'; return; }
+  let total = 0;
+  tbody.innerHTML = data.map(r => {
+    const amt = parseFloat(r[6]) || 0;
+    total += amt;
+    return `<tr>
+      <td>${r[0]}</td>
+      <td><span class="badge badge-green">${r[1] || '—'}</span></td>
+      <td>${r[2]}</td>
+      <td>${fmtNum(r[3])}</td>
+      <td>${fmt(r[4])}</td>
+      <td><strong>${fmt(amt)}</strong></td>
+      <td style="color:var(--muted);font-size:0.78rem;">${r[7] || ''}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('sale-total-shown').textContent = fmt(total);
+}
+function filterSales() {
+  const q = document.getElementById('sale-search').value.toLowerCase();
+  const popup = document.getElementById('sale-filter-popup').value;
+  const filtered = salesData.filter(r =>
+    (!q || r[2].toLowerCase().includes(q)) &&
+    (!popup || r[1] === popup)
+  );
+  renderSales(filtered);
+}
+function calcSaleTotal() {
+  const qty = parseFloat(document.getElementById('sale-qty').value) || 0;
+  const up = parseFloat(document.getElementById('sale-unitprice').value) || 0;
+  if (qty && up) document.getElementById('sale-total').value = (qty * up).toFixed(2);
+}
+async function addSale() {
+  const item = document.getElementById('sale-item').value.trim();
+  const popup = document.getElementById('sale-popup').value.trim();
+  const qty = document.getElementById('sale-qty').value;
+  const unitprice = document.getElementById('sale-unitprice').value;
+  const date = document.getElementById('sale-date').value;
+  if (!item || !popup || !qty || !unitprice || !date) { showToast('All starred fields are required.'); return; }
+  let total = document.getElementById('sale-total').value || (parseFloat(qty) * parseFloat(unitprice)).toFixed(2);
+  const payload = { date, popup, item, qty, unitPrice: unitprice, total, notes: document.getElementById('sale-notes').value.trim() };
+  const res = await apiPost('addSale', payload);
+  if (res && res.status === 'ok') {
+    showToast('✓ Sale recorded.');
+    ['sale-item','sale-qty','sale-unitprice','sale-total','sale-notes'].forEach(id => document.getElementById(id).value = '');
+    loadSales();
+  }
+}
+function exportSalesCSV() {
+  const headers = ['Date','Pop-Up','Item','Qty Sold','Unit Price (₹)','Total (₹)','Notes'];
+  const rows = salesData.map(r => [r[0],r[1],r[2],r[3],r[4],r[6],r[7]]);
+  downloadCSV('Sonder_Sales', headers, rows);
+}
+
+// ══════════════════════════════════════════════
+// P&L
+// ══════════════════════════════════════════════
+async function loadPL() {
+  await Promise.all([fetchPurchases(), fetchSales()]);
+  const allPopups = [...new Set([
+    ...salesData.map(r => r[1]),
+    ...purchasesData.map(r => r[9])
+  ].filter(Boolean))];
+  const sel = document.getElementById('pl-popup-select');
+  sel.innerHTML = '<option value="all">All Pop-Ups (Cumulative)</option>' + allPopups.map(p => `<option>${p}</option>`).join('');
+  renderPL();
+}
+function renderPL() {
+  const popup = document.getElementById('pl-popup-select').value;
+  const sales = popup === 'all' ? salesData : salesData.filter(r => r[1] === popup);
+  const purchases = popup === 'all' ? purchasesData.filter(r => r[1] === 'purchase') : purchasesData.filter(r => r[1] === 'purchase' && r[9] === popup);
+  const expenses = popup === 'all' ? purchasesData.filter(r => r[1] === 'expense') : purchasesData.filter(r => r[1] === 'expense' && r[9] === popup);
+
+  const revenue = sales.reduce((s, r) => s + (parseFloat(r[6]) || 0), 0);
+  const cogs = purchases.reduce((s, r) => s + (parseFloat(r[10]) || 0), 0);
+  const overheads = expenses.reduce((s, r) => s + (parseFloat(r[10]) || 0), 0);
+  const net = revenue - cogs - overheads;
+  const margin = revenue ? ((net / revenue) * 100).toFixed(1) : 0;
+
+  document.getElementById('pl-revenue').textContent = fmt(revenue);
+  document.getElementById('pl-cogs').textContent = fmt(cogs);
+  document.getElementById('pl-overheads').textContent = fmt(overheads);
+  const netEl = document.getElementById('pl-net');
+  netEl.textContent = fmt(net);
+  netEl.className = 'value ' + (net >= 0 ? 'green' : 'red');
+
+  // Breakdown
+  const breakdown = document.getElementById('pl-breakdown');
+  const salesByItem = {};
+  sales.forEach(r => { salesByItem[r[2]] = (salesByItem[r[2]] || 0) + (parseFloat(r[6]) || 0); });
+  const purByCat = {};
+  purchases.forEach(r => { purByCat[r[3] || 'Other'] = (purByCat[r[3] || 'Other'] || 0) + (parseFloat(r[10]) || 0); });
+  const expByCat = {};
+  expenses.forEach(r => { expByCat[r[3] || 'Other'] = (expByCat[r[3] || 'Other'] || 0) + (parseFloat(r[10]) || 0); });
+
+  breakdown.innerHTML = `
+    <div class="pl-section-label">Revenue by Item</div>
+    ${Object.entries(salesByItem).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+      <div class="pl-line">
+        <span>${k}</span><span style="color:var(--sage-dark);">${fmt(v)}</span>
+      </div>`).join('') || '<div class="pl-line"><span style="color:var(--muted);font-style:italic;">No sales data</span><span></span></div>'}
+    <div class="pl-line total">
+      <span>Total Revenue</span><span style="color:var(--sage-dark);">${fmt(revenue)}</span>
+    </div>
+
+    <div class="pl-section-label" style="margin-top:1.5rem;">Cost of Goods by Category</div>
+    ${Object.entries(purByCat).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+      <div class="pl-line">
+        <span>${k}</span><span style="color:var(--red);">${fmt(v)}</span>
+      </div>`).join('') || '<div class="pl-line"><span style="color:var(--muted);font-style:italic;">No purchases</span><span></span></div>'}
+    <div class="pl-line total">
+      <span>Total COGS</span><span style="color:var(--red);">${fmt(cogs)}</span>
+    </div>
+
+    <div class="pl-section-label" style="margin-top:1.5rem;">Overheads by Category</div>
+    ${Object.entries(expByCat).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+      <div class="pl-line">
+        <span>${k}</span><span style="color:var(--red);">${fmt(v)}</span>
+      </div>`).join('') || '<div class="pl-line"><span style="color:var(--muted);font-style:italic;">No expenses</span><span></span></div>'}
+    <div class="pl-line total">
+      <span>Total Overheads</span><span style="color:var(--red);">${fmt(overheads)}</span>
+    </div>
+
+    <div style="margin-top:1.5rem; padding:1.25rem; background:${net>=0?'var(--green-light)':'var(--red-light)'}; border-radius:2px;">
+      <div class="pl-line ${net>=0?'profit':'loss'}" style="border:none;font-size:1.05rem;">
+        <span>Net ${net>=0?'Profit':'Loss'}</span>
+        <span>${fmt(Math.abs(net))}</span>
+      </div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.25rem;">
+        Margin: ${margin}%
+      </div>
+    </div>
+  `;
+}
+function exportPLPDF() {
+  const popup = document.getElementById('pl-popup-select').value;
+  const label = popup === 'all' ? 'All Pop-Ups' : popup;
+  const breakdown = document.getElementById('pl-breakdown').innerHTML;
+  const plStats = document.getElementById('pl-stats').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <title>Sonder P&L — ${label}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+      body{font-family:'Jost',sans-serif;font-weight:300;color:#2C2C2C;max-width:700px;margin:0 auto;padding:2rem;}
+      h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2rem;margin-bottom:0.25rem;}
+      .sub{color:#7A7265;font-size:0.8rem;margin-bottom:2rem;}
+      .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+      .stat-card{border:1px solid #DDD5C5;padding:1rem;}
+      .stat-card .label{font-size:0.62rem;letter-spacing:.12em;text-transform:uppercase;color:#7A7265;margin-bottom:.3rem;}
+      .stat-card .value{font-family:'Cormorant Garamond',serif;font-size:1.5rem;}
+      .green{color:#4E7560;}.red{color:#B85A5A;}.gold{color:#B89A5A;}
+      .pl-line{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #EDE7D9;font-size:.85rem;}
+      .pl-line.total{border-bottom:2px solid #2C2C2C;font-weight:500;}
+      .pl-section-label{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:#7A7265;padding:.75rem 0 .25rem;}
+      @media print{body{padding:0;}}
+    </style>
+  </head><body>
+    <h1>Sonder — Profit & Loss</h1>
+    <div class="sub">${label} · Generated ${new Date().toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'})}</div>
+    <div class="stat-row">${plStats}</div>
+    ${breakdown}
+    <script>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ══════════════════════════════════════════════
+// CSV EXPORT
+// ══════════════════════════════════════════════
+function downloadCSV(filename, headers, rows) {
+  const escape = v => `"${String(v||'').replace(/"/g,'""')}"`;
+  const csv = [headers, ...rows].map(r => r.map(escape).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  if (SCRIPT_URL) document.getElementById('scriptUrl').value = SCRIPT_URL;
+  // set today's date in all date fields
+  const dateFields = ['pur-date','exp-date','sale-date'];
+  dateFields.forEach(id => { const el = document.getElementById(id); if (el) el.value = today(); });
+  loadDashboard();
+});
+</script>
+</body>
+</html>
